@@ -26,3 +26,14 @@ def test_qwen_payload_uses_image_url_content() -> None:
         content = payload["messages"][1]["content"]
         assert content[0]["type"] == "image_url"
         assert content[1]["type"] == "text"
+
+
+def test_qwen_payload_size_reports_bytes() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        image = Path(tmp) / "image.jpg"
+        image.write_bytes(b"fake")
+        client = QwenVisionClient(api_key="x", model="qwen-vl-plus")
+
+        size = client.payload_size_bytes(image, "find target", config=TaricConfig())
+
+        assert size > 0

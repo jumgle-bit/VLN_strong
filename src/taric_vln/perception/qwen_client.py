@@ -86,6 +86,44 @@ class QwenVisionClient:
                 error=str(exc),
             )
 
+    def text_only_json(self, instruction: str) -> dict[str, Any]:
+        if not self.api_key:
+            raise RuntimeError("DASHSCOPE_API_KEY or QWEN_API_KEY is not set.")
+        payload = {
+            "model": self.model,
+            "temperature": 0.0,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": "Return only strict JSON."},
+                {
+                    "role": "user",
+                    "content": (
+                        "This is a Qwen vision endpoint connectivity diagnostic. "
+                        f"Instruction: {instruction}. "
+                        "Return JSON with keys ok, model_role, note."
+                    ),
+                },
+            ],
+        }
+        response = self._post_json(payload)
+        content = response["choices"][0]["message"]["content"]
+        parsed = extract_json_object(content)
+        parsed["_api_meta"] = {"model": self.model, "usage": response.get("usage", {})}
+        return parsed
+
+    def payload_size_bytes(
+        self,
+        image_path: str | Path,
+        instruction: str,
+        camera: CameraIntrinsics | None = None,
+        previous_state: dict[str, Any] | None = None,
+        config: TaricConfig | None = None,
+    ) -> int:
+        camera = camera or CameraIntrinsics()
+        config = config or TaricConfig()
+        payload = self._build_payload(Path(image_path), instruction, camera, previous_state, config)
+        return len(json.dumps(payload).encode("utf-8"))
+
     def _build_payload(
         self,
         image_path: Path,

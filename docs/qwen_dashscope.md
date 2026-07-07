@@ -22,6 +22,25 @@ python scripts/smoke_qwen_vision.py \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
+First check key/model/network without sending an image:
+
+```bash
+python scripts/smoke_qwen_vision.py \
+  --diagnose \
+  --image data/samples/example.jpg \
+  --instruction "Find the red library entrance. Follow the path and avoid grass."
+```
+
+The smoke script defaults to `--timeout 20 --retries 0` so failures return quickly. For a slow endpoint, try:
+
+```bash
+python scripts/smoke_qwen_vision.py \
+  --timeout 60 \
+  --retries 0 \
+  --image data/samples/example.jpg \
+  --instruction "Find the red library entrance. Follow the path and avoid grass."
+```
+
 Expected output is the normalized `VLMObservation` JSON:
 
 ```json
