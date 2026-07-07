@@ -16,6 +16,7 @@ from taric_vln.perception import (
     DeepSeekVLMClient,
     MockVLMClient,
     PythonVisionClient,
+    QwenVisionClient,
 )
 from taric_vln.sim.offline_runner import OfflineEpisodeRunner, group_by_episode, load_manifest
 
@@ -26,17 +27,22 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--config", default=None)
     parser.add_argument("--mock", action="store_true")
+    parser.add_argument("--qwen", action="store_true")
+    parser.add_argument("--qwen-model", default=None)
+    parser.add_argument("--qwen-base-url", default=None)
     parser.add_argument("--python-adapter", default=None)
     parser.add_argument("--command-adapter", default=None)
     args = parser.parse_args()
 
     config = TaricConfig.from_json(args.config) if args.config else TaricConfig()
     grounder = TraversabilityGrounder(config)
-    choices = [args.mock, bool(args.python_adapter), bool(args.command_adapter)]
+    choices = [args.mock, args.qwen, bool(args.python_adapter), bool(args.command_adapter)]
     if sum(1 for enabled in choices if enabled) > 1:
-        parser.error("Use only one of --mock, --python-adapter, or --command-adapter.")
+        parser.error("Use only one of --mock, --qwen, --python-adapter, or --command-adapter.")
     if args.mock:
         client = MockVLMClient()
+    elif args.qwen:
+        client = QwenVisionClient(model=args.qwen_model, base_url=args.qwen_base_url)
     elif args.python_adapter:
         client = PythonVisionClient(args.python_adapter)
     elif args.command_adapter:
