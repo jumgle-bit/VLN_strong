@@ -6,6 +6,7 @@ It includes:
 
 - OpenAI-compatible `DeepSeekVLMClient` with image-input diagnostics, JSON parsing, retries, rate limiting, local response cache, and fallback behavior.
 - `DeepSeekTextPlanner` for text-only instruction decomposition when the DeepSeek endpoint does not support image input.
+- Python and command-line adapters for plugging in your own vision model.
 - Cue extraction, visibility gating, traversability-aware heading grounding, and 3D cue memory.
 - Offline episode runner and evaluation metrics for SR, SPL, Fail@CF, and CFSR.
 - Pseudolabel generation utilities for distilling API outputs into local training data.
@@ -52,6 +53,15 @@ For the confirmed text-only DeepSeek path, run:
 
 ```bash
 python scripts/plan_instruction.py \
+  --instruction "Find the red library entrance. Follow the path and avoid grass."
+```
+
+To import your own vision model, see `docs/vision_adapter.md` and run:
+
+```bash
+python scripts/smoke_vision_adapter.py \
+  --python-adapter /home/mystery/models/my_vln_adapter.py:MyVisionAdapter \
+  --image data/samples/example.jpg \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
