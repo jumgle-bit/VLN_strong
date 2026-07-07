@@ -92,6 +92,23 @@ python scripts/summarize_run.py --input outputs/demo_run.jsonl
 Remove `--mock` to use the DeepSeek API.
 Use `--qwen` to use the Qwen/DashScope vision API.
 
+## Synthetic 30-Episode Dataset
+
+The repository includes a generated engineering dataset under `data/episodes/synthetic_30`.
+
+Run it with:
+
+```bash
+python scripts/run_offline_episode.py \
+  --manifest data/episodes/synthetic_30/manifest.jsonl \
+  --output outputs/synthetic_30_run.jsonl \
+  --qwen
+
+python scripts/summarize_run.py --input outputs/synthetic_30_run.jsonl
+```
+
+This is a smoke-test dataset for validating the pipeline, not a paper-quality benchmark.
+
 ## Pseudolabel Generation
 
 ```bash

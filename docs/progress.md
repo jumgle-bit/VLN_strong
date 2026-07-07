@@ -20,6 +20,7 @@ This document tracks the TARIC/VLN reproduction plan at the current engineering 
 - Added Qwen/DashScope vision API support.
 - Confirmed Qwen image access with the synthetic `library_entrance.png` smoke-test image.
 - Added nonstandard/truncated Qwen JSON recovery for required TARIC fields.
+- Added a generated 30-episode synthetic VLN dataset for small-scale offline pipeline validation.
 
 ## Current Stage
 
@@ -39,15 +40,15 @@ Approximate progress: 40-45%.
 
 ## Next Milestone
 
-Run the included demo episode end to end:
+Run the included 30-episode synthetic dataset end to end:
 
 ```bash
 python scripts/run_offline_episode.py \
-  --manifest data/samples/demo.jsonl \
-  --output outputs/demo_run.jsonl \
+  --manifest data/episodes/synthetic_30/manifest.jsonl \
+  --output outputs/synthetic_30_run.jsonl \
   --qwen
 
-python scripts/summarize_run.py --input outputs/demo_run.jsonl
+python scripts/summarize_run.py --input outputs/synthetic_30_run.jsonl
 ```
 
-After this works, replace `data/samples/demo.jsonl` with a real sequence collected from simulation, video, or ROS bags.
+After this works, replace the synthetic manifest with real sequences collected from simulation, video, or ROS bags.
