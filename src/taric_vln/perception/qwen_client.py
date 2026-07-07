@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from json import JSONDecodeError
 import os
 from pathlib import Path
 import time
@@ -66,7 +67,7 @@ class QwenVisionClient:
             response = self._post_json(payload)
             latency_s = time.time() - started_at
             content = response["choices"][0]["message"]["content"]
-            parsed = extract_json_object(content)
+            parsed = parse_qwen_json_content(content)
             parsed["_api_meta"] = {
                 "latency_s": latency_s,
                 "model": self.model,
@@ -116,7 +117,7 @@ class QwenVisionClient:
         self._set_max_tokens(payload, 128)
         response = self._post_json(payload)
         content = response["choices"][0]["message"]["content"]
-        parsed = extract_json_object(content)
+        parsed = parse_qwen_json_content(content)
         parsed["_api_meta"] = {"model": self.model, "usage": response.get("usage", {})}
         return parsed
 
@@ -142,7 +143,7 @@ class QwenVisionClient:
         self._set_max_tokens(payload, 128)
         response = self._post_json(payload)
         content = response["choices"][0]["message"]["content"]
-        parsed = extract_json_object(content)
+        parsed = parse_qwen_json_content(content)
         parsed["_api_meta"] = {"model": self.model, "usage": response.get("usage", {})}
         return parsed
 
@@ -227,3 +228,17 @@ class QwenVisionClient:
         if elapsed < self.min_interval_s:
             time.sleep(self.min_interval_s - elapsed)
         self._last_call_time = time.time()
+
+
+def parse_qwen_json_content(content: str) -> dict[str, Any]:
+    try:
+        return extract_json_object(content)
+    except (JSONDecodeError, ValueError) as exc:
+        snippet = content.strip().replace("\n", "\\n")
+        if len(snippet) > 800:
+            snippet = snippet[:800] + "...<truncated>"
+        raise RuntimeError(
+            "Qwen returned non-JSON or truncated JSON. "
+            "Try increasing --max-tokens to 512 or 1024. "
+            f"Raw content starts with: {snippet}"
+        ) from exc

@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 from taric_vln.config import TaricConfig
-from taric_vln.perception.qwen_client import QwenVisionClient
+from taric_vln.perception.qwen_client import QwenVisionClient, parse_qwen_json_content
 from taric_vln.types import CameraIntrinsics
 
 
@@ -38,3 +38,12 @@ def test_qwen_payload_size_reports_bytes() -> None:
         size = client.payload_size_bytes(image, "find target", config=TaricConfig())
 
         assert size > 0
+
+
+def test_qwen_parse_error_mentions_max_tokens() -> None:
+    try:
+        parse_qwen_json_content('{"visible": true, "focus_pixel": [320,')
+    except RuntimeError as exc:
+        assert "--max-tokens" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError")

@@ -70,7 +70,7 @@ For a Qwen/DashScope vision API, set `DASHSCOPE_API_KEY` and run:
 
 ```bash
 python scripts/smoke_qwen_vision.py \
-  --image data/samples/example.jpg \
+  --image data/samples/library_entrance.png \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 

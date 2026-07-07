@@ -84,6 +84,11 @@ def main() -> None:
         )
     except RuntimeError as exc:
         print(str(exc), file=sys.stderr)
+        if "truncated JSON" in str(exc):
+            print(
+                "\nThe model likely ran out of output tokens. Retry with --max-tokens 512 or --max-tokens 1024.",
+                file=sys.stderr,
+            )
         raise SystemExit(1) from exc
     print(json.dumps(observation.to_dict(), ensure_ascii=False, indent=2))
 

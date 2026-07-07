@@ -18,7 +18,7 @@ You can also use `qwen-vl-max` if your account has access.
 
 ```bash
 python scripts/smoke_qwen_vision.py \
-  --image data/samples/example.jpg \
+  --image data/samples/library_entrance.png \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
@@ -27,7 +27,7 @@ First check key/model/network without sending an image:
 ```bash
 python scripts/smoke_qwen_vision.py \
   --diagnose \
-  --image data/samples/example.jpg \
+  --image data/samples/library_entrance.png \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
@@ -37,7 +37,7 @@ The smoke script defaults to `--timeout 20 --retries 0` so failures return quick
 python scripts/smoke_qwen_vision.py \
   --timeout 60 \
   --retries 0 \
-  --image data/samples/example.jpg \
+  --image data/samples/library_entrance.png \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
@@ -48,7 +48,7 @@ python scripts/smoke_qwen_vision.py \
   --simple-image \
   --timeout 30 \
   --retries 0 \
-  --image data/samples/example.jpg \
+  --image data/samples/library_entrance.png \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
