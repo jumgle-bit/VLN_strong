@@ -4,6 +4,10 @@ import argparse
 import json
 from pathlib import Path
 
+from _bootstrap import add_repo_src_to_path
+
+add_repo_src_to_path()
+
 from taric_vln.config import TaricConfig
 from taric_vln.grounding import TraversabilityGrounder
 from taric_vln.perception import CueExtractor, DeepSeekVLMClient, MockVLMClient

@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import argparse
 
+from _bootstrap import add_repo_src_to_path
+
+add_repo_src_to_path()
+
 from taric_vln.config import TaricConfig
 from taric_vln.perception import DeepSeekVLMClient
 from taric_vln.sim.offline_runner import load_manifest
