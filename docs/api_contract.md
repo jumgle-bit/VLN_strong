@@ -2,6 +2,14 @@
 
 `DeepSeekVLMClient` expects an OpenAI-compatible chat completions endpoint with image input. The model must return strict JSON.
 
+DeepSeek's text API can be checked without image input:
+
+```bash
+python scripts/smoke_deepseek.py --text-only --instruction "Find the red library entrance."
+```
+
+If the text-only request succeeds but the image request fails with HTTP 400, the configured endpoint/model does not accept `image_url` content. Use a vision-capable endpoint/model or replace this adapter while keeping the same `VLMObservation` output contract.
+
 ## Input
 
 - RGB image path

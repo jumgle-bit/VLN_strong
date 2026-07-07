@@ -37,7 +37,15 @@ python scripts/smoke_deepseek.py \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
-If the API endpoint does not support image input, this script will fail early. In that case, keep DeepSeek for text planning and replace `DeepSeekVLMClient` with a local vision model adapter that returns the same `VLMObservation` interface.
+First verify the API key/model/base URL with a text-only request:
+
+```bash
+python scripts/smoke_deepseek.py \
+  --text-only \
+  --instruction "Find the red library entrance. Follow the path and avoid grass."
+```
+
+If `--text-only` works but the image request returns HTTP 400, the DeepSeek endpoint is rejecting image input. In that case, keep DeepSeek for text planning and replace `DeepSeekVLMClient` with a vision-capable model adapter that returns the same `VLMObservation` interface.
 
 ## Offline Episode Replay
 

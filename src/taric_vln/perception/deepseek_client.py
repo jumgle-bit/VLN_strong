@@ -17,6 +17,10 @@ from taric_vln.geometry import pixel_to_bearing
 from taric_vln.types import CameraIntrinsics, VLMObservation
 
 
+class DeepSeekAPIError(RuntimeError):
+    """Raised when the DeepSeek HTTP API rejects a request."""
+
+
 class DeepSeekVLMClient:
     """OpenAI-compatible DeepSeek client for image-conditioned JSON outputs."""
 
@@ -80,6 +84,43 @@ class DeepSeekVLMClient:
                 raise
             return self._fallback_observation(str(exc), instruction, config)
 
+    def text_only_json(
+        self,
+        instruction: str,
+        config: TaricConfig | None = None,
+    ) -> dict[str, Any]:
+        """Small diagnostic request that does not include an image."""
+
+        config = config or TaricConfig()
+        if not self.api_key:
+            raise RuntimeError("DEEPSEEK_API_KEY is not set.")
+
+        payload = {
+            "model": self.model,
+            "temperature": 0.0,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "Return only strict JSON.",
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "This is a text-only DeepSeek API diagnostic for a VLN project. "
+                        f"Instruction: {instruction}\n"
+                        "Return JSON with keys: ok, model_role, note. "
+                        f"The navigation config has {config.heading_sectors} heading sectors."
+                    ),
+                },
+            ],
+        }
+        response = self._post_json(payload)
+        content = response["choices"][0]["message"]["content"]
+        parsed = extract_json_object(content)
+        parsed["_api_meta"] = {"model": self.model, "usage": response.get("usage", {})}
+        return parsed
+
     def _build_payload(
         self,
         image_path: Path,
@@ -126,7 +167,11 @@ class DeepSeekVLMClient:
             try:
                 with urlopen(request, timeout=self.timeout_s) as response:
                     return json.loads(response.read().decode("utf-8"))
-            except (HTTPError, URLError, TimeoutError) as exc:
+            except HTTPError as exc:
+                last_error = DeepSeekAPIError(format_http_error(exc))
+                if attempt < self.retries:
+                    time.sleep(min(2.0**attempt, 8.0))
+            except (URLError, TimeoutError) as exc:
                 last_error = exc
                 if attempt < self.retries:
                     time.sleep(min(2.0**attempt, 8.0))
@@ -290,6 +335,19 @@ def image_to_data_url(image_path: Path) -> str:
     mime = mimetypes.guess_type(str(image_path))[0] or "image/jpeg"
     encoded = base64.b64encode(image_path.read_bytes()).decode("ascii")
     return f"data:{mime};base64,{encoded}"
+
+
+def format_http_error(exc: HTTPError) -> str:
+    try:
+        body = exc.read().decode("utf-8", errors="replace")
+    except Exception:
+        body = ""
+    body = body.strip()
+    if len(body) > 2000:
+        body = body[:2000] + "...<truncated>"
+    if body:
+        return f"HTTP {exc.code} {exc.reason}: {body}"
+    return f"HTTP {exc.code} {exc.reason}"
 
 
 def extract_json_object(text: str) -> dict[str, Any]:
