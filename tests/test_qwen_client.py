@@ -23,6 +23,7 @@ def test_qwen_payload_uses_image_url_content() -> None:
         )
 
         assert payload["model"] == "qwen-vl-plus"
+        assert payload["max_tokens"] == 512
         content = payload["messages"][1]["content"]
         assert content[0]["type"] == "image_url"
         assert content[1]["type"] == "text"

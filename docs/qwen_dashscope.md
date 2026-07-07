@@ -41,6 +41,19 @@ python scripts/smoke_qwen_vision.py \
   --instruction "Find the red library entrance. Follow the path and avoid grass."
 ```
 
+If the full TARIC prompt times out, test a minimal image request:
+
+```bash
+python scripts/smoke_qwen_vision.py \
+  --simple-image \
+  --timeout 30 \
+  --retries 0 \
+  --image data/samples/example.jpg \
+  --instruction "Find the red library entrance. Follow the path and avoid grass."
+```
+
+If `--simple-image` works but the full request times out, increase timeout or simplify the TARIC prompt. If `--simple-image` also times out, the issue is image upload/endpoint latency rather than navigation logic.
+
 Expected output is the normalized `VLMObservation` JSON:
 
 ```json

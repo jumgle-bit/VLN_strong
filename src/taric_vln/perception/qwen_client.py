@@ -31,6 +31,7 @@ class QwenVisionClient:
         timeout_s: float = 60.0,
         retries: int = 2,
         min_interval_s: float = 0.0,
+        max_tokens: int | None = 512,
         fallback_on_error: bool = True,
     ) -> None:
         self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY") or os.getenv("QWEN_API_KEY", "")
@@ -43,6 +44,7 @@ class QwenVisionClient:
         self.timeout_s = timeout_s
         self.retries = retries
         self.min_interval_s = min_interval_s
+        self.max_tokens = max_tokens
         self.fallback_on_error = fallback_on_error
         self._last_call_time = 0.0
 
@@ -86,6 +88,38 @@ class QwenVisionClient:
                 error=str(exc),
             )
 
+    def simple_image_json(self, image_path: str | Path, instruction: str) -> dict[str, Any]:
+        if not self.api_key:
+            raise RuntimeError("DASHSCOPE_API_KEY or QWEN_API_KEY is not set.")
+        payload = {
+            "model": self.model,
+            "temperature": 0.0,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": "Return only strict compact JSON."},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": image_to_data_url(Path(image_path))}},
+                        {
+                            "type": "text",
+                            "text": (
+                                "Briefly inspect this image for a navigation task. "
+                                f"Instruction: {instruction}. "
+                                "Return JSON with keys ok, visible_goal, short_description."
+                            ),
+                        },
+                    ],
+                },
+            ],
+        }
+        self._set_max_tokens(payload, 128)
+        response = self._post_json(payload)
+        content = response["choices"][0]["message"]["content"]
+        parsed = extract_json_object(content)
+        parsed["_api_meta"] = {"model": self.model, "usage": response.get("usage", {})}
+        return parsed
+
     def text_only_json(self, instruction: str) -> dict[str, Any]:
         if not self.api_key:
             raise RuntimeError("DASHSCOPE_API_KEY or QWEN_API_KEY is not set.")
@@ -105,6 +139,7 @@ class QwenVisionClient:
                 },
             ],
         }
+        self._set_max_tokens(payload, 128)
         response = self._post_json(payload)
         content = response["choices"][0]["message"]["content"]
         parsed = extract_json_object(content)
@@ -133,7 +168,7 @@ class QwenVisionClient:
         config: TaricConfig,
     ) -> dict[str, Any]:
         prompt = build_vlm_prompt(instruction, camera, previous_state, config)
-        return {
+        payload = {
             "model": self.model,
             "temperature": 0.0,
             "response_format": {"type": "json_object"},
@@ -154,6 +189,13 @@ class QwenVisionClient:
                 },
             ],
         }
+        self._set_max_tokens(payload)
+        return payload
+
+    def _set_max_tokens(self, payload: dict[str, Any], override: int | None = None) -> None:
+        max_tokens = override if override is not None else self.max_tokens
+        if max_tokens is not None:
+            payload["max_tokens"] = int(max_tokens)
 
     def _post_json(self, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.base_url}/chat/completions"

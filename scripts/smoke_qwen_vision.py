@@ -23,10 +23,16 @@ def main() -> None:
     parser.add_argument("--config", default=None)
     parser.add_argument("--timeout", type=float, default=20.0)
     parser.add_argument("--retries", type=int, default=0)
+    parser.add_argument("--max-tokens", type=int, default=512)
     parser.add_argument(
         "--diagnose",
         action="store_true",
         help="Send a no-image request to verify key/model/base_url first.",
+    )
+    parser.add_argument(
+        "--simple-image",
+        action="store_true",
+        help="Send a minimal image request before the full TARIC JSON request.",
     )
     args = parser.parse_args()
 
@@ -36,11 +42,13 @@ def main() -> None:
         base_url=args.base_url,
         timeout_s=args.timeout,
         retries=args.retries,
+        max_tokens=args.max_tokens,
         fallback_on_error=False,
     )
     try:
         print(
-            f"Qwen endpoint={client.base_url} model={client.model} timeout={args.timeout}s retries={args.retries}",
+            f"Qwen endpoint={client.base_url} model={client.model} timeout={args.timeout}s "
+            f"retries={args.retries} max_tokens={args.max_tokens}",
             file=sys.stderr,
         )
         if args.diagnose:
@@ -62,6 +70,11 @@ def main() -> None:
             f"image_size={image_path.stat().st_size} bytes request_payload={payload_size} bytes",
             file=sys.stderr,
         )
+        if args.simple_image:
+            payload = client.simple_image_json(image_path, args.instruction)
+            print(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+
         observation = client.analyze(
             image_path=image_path,
             instruction=args.instruction,
