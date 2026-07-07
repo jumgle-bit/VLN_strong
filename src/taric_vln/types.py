@@ -103,6 +103,27 @@ class VLMObservation:
         }
 
 
+@dataclass
+class InstructionPlan:
+    instruction: str
+    exploration_phrase: str = ""
+    goal_phrase: str = ""
+    avoid_phrases: list[str] = field(default_factory=list)
+    route_cues: list[str] = field(default_factory=list)
+    raw: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "instruction": self.instruction,
+            "exploration_phrase": self.exploration_phrase,
+            "goal_phrase": self.goal_phrase,
+            "avoid_phrases": self.avoid_phrases,
+            "route_cues": self.route_cues,
+            "error": self.error,
+        }
+
+
 @dataclass(frozen=True)
 class ControlCommand:
     heading_rad: float

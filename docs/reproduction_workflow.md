@@ -6,6 +6,14 @@
 2. Run `scripts/smoke_deepseek.py` on one image.
 3. Confirm image input works and JSON is parseable.
 
+If DeepSeek rejects image input with `unknown variant image_url, expected text`, use it only for text planning:
+
+```bash
+python scripts/plan_instruction.py --instruction "Find the red library entrance. Follow the path and avoid grass."
+```
+
+Then connect a separate vision-capable adapter to the `VLMObservation` interface.
+
 ## Stage 2: Offline Replay
 
 Create JSONL manifests from image sequences or ROS bags. Each row should include image path, instruction, pose, camera intrinsics, and optional ground-truth goal/cue fields.

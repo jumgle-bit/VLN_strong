@@ -4,7 +4,8 @@ This repository implements a runnable engineering scaffold for reproducing the T
 
 It includes:
 
-- OpenAI-compatible `DeepSeekVLMClient` with image input, JSON parsing, retries, rate limiting, local response cache, and fallback behavior.
+- OpenAI-compatible `DeepSeekVLMClient` with image-input diagnostics, JSON parsing, retries, rate limiting, local response cache, and fallback behavior.
+- `DeepSeekTextPlanner` for text-only instruction decomposition when the DeepSeek endpoint does not support image input.
 - Cue extraction, visibility gating, traversability-aware heading grounding, and 3D cue memory.
 - Offline episode runner and evaluation metrics for SR, SPL, Fail@CF, and CFSR.
 - Pseudolabel generation utilities for distilling API outputs into local training data.
@@ -46,6 +47,13 @@ python scripts/smoke_deepseek.py \
 ```
 
 If `--text-only` works but the image request returns HTTP 400, the DeepSeek endpoint is rejecting image input. In that case, keep DeepSeek for text planning and replace `DeepSeekVLMClient` with a vision-capable model adapter that returns the same `VLMObservation` interface.
+
+For the confirmed text-only DeepSeek path, run:
+
+```bash
+python scripts/plan_instruction.py \
+  --instruction "Find the red library entrance. Follow the path and avoid grass."
+```
 
 ## Offline Episode Replay
 
