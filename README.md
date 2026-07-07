@@ -86,9 +86,11 @@ Run:
 
 ```bash
 python scripts/run_offline_episode.py --manifest data/samples/demo.jsonl --output outputs/demo_run.jsonl --mock
+python scripts/summarize_run.py --input outputs/demo_run.jsonl
 ```
 
 Remove `--mock` to use the DeepSeek API.
+Use `--qwen` to use the Qwen/DashScope vision API.
 
 ## Pseudolabel Generation
 

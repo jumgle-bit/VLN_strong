@@ -4,6 +4,8 @@ Put local smoke-test images and JSONL manifests here.
 
 `library_entrance.png` is a small synthetic smoke-test image with a red library entrance, a paved path, and grass on both sides.
 
+`demo.jsonl` is a minimal four-step offline episode manifest using `library_entrance.png`.
+
 Example manifest row:
 
 ```json
