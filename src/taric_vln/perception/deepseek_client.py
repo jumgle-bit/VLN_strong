@@ -314,7 +314,7 @@ def build_vlm_prompt(
         f"Previous state: {json.dumps(previous_state or {}, sort_keys=True)}\n"
         f"Use {config.heading_sectors} left-to-right heading sectors covering "
         f"+/-{config.max_bearing_deg} degrees. Index 0 is image-left.\n"
-        "Return strict JSON with this schema:\n"
+        "Return strict compact JSON with exactly these keys and no other keys:\n"
         "{\n"
         '  "exploration_phrase": "coarse navigation phrase",\n'
         '  "goal_phrase": "specific target phrase",\n'
@@ -325,6 +325,8 @@ def build_vlm_prompt(
         '  "traversability_scores": [10 numbers from 0 to 1],\n'
         '  "confidence": number from 0 to 1\n'
         "}\n"
+        "Do not include camera, previous_state, image URLs, target descriptions, path descriptions, "
+        "Markdown fences, comments, or explanatory text. "
         "If the goal is not confidently visible, set visible=false and focus_pixel=null, "
         "but still provide an exploration cue and traversability scores. "
         "Traversability score 1 means safe and easy to drive, 0 means blocked or unsafe."

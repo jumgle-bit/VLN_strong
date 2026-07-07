@@ -4,6 +4,7 @@ import json
 from json import JSONDecodeError
 import os
 from pathlib import Path
+import re
 import time
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -234,6 +235,10 @@ def parse_qwen_json_content(content: str) -> dict[str, Any]:
     try:
         return extract_json_object(content)
     except (JSONDecodeError, ValueError) as exc:
+        recovered = recover_vln_payload(content)
+        if recovered is not None:
+            recovered["_recovered_from_non_json"] = True
+            return recovered
         snippet = content.strip().replace("\n", "\\n")
         if len(snippet) > 800:
             snippet = snippet[:800] + "...<truncated>"
@@ -242,3 +247,80 @@ def parse_qwen_json_content(content: str) -> dict[str, Any]:
             "Try increasing --max-tokens to 512 or 1024. "
             f"Raw content starts with: {snippet}"
         ) from exc
+
+
+def recover_vln_payload(content: str) -> dict[str, Any] | None:
+    payload: dict[str, Any] = {}
+    for key in ("exploration_phrase", "goal_phrase"):
+        value = recover_json_string(content, key)
+        if value is not None:
+            payload[key] = value
+
+    visible = recover_json_bool(content, "visible")
+    if visible is not None:
+        payload["visible"] = visible
+
+    focus = recover_json_array(content, "focus_pixel")
+    if focus is None and re.search(r'"focus_pixel"\s*:\s*null', content):
+        payload["focus_pixel"] = None
+    elif focus is not None:
+        payload["focus_pixel"] = focus
+
+    for key in ("tile_scores", "traversability_scores"):
+        value = recover_json_array(content, key)
+        if value is not None:
+            payload[key] = value
+
+    for key in ("cue_bearing_deg", "cue_bearing_rad", "confidence"):
+        value = recover_json_number(content, key)
+        if value is not None:
+            payload[key] = value
+
+    required = {
+        "exploration_phrase",
+        "goal_phrase",
+        "visible",
+        "tile_scores",
+        "traversability_scores",
+        "confidence",
+    }
+    if required.issubset(payload) and (
+        "cue_bearing_deg" in payload or "cue_bearing_rad" in payload or "focus_pixel" in payload
+    ):
+        return payload
+    return None
+
+
+def recover_json_string(content: str, key: str) -> str | None:
+    match = re.search(rf'"{re.escape(key)}"\s*:\s*"((?:\\.|[^"\\])*)"', content, re.DOTALL)
+    if not match:
+        return None
+    try:
+        return json.loads(f'"{match.group(1)}"')
+    except JSONDecodeError:
+        return match.group(1)
+
+
+def recover_json_bool(content: str, key: str) -> bool | None:
+    match = re.search(rf'"{re.escape(key)}"\s*:\s*(true|false)', content, re.IGNORECASE)
+    if not match:
+        return None
+    return match.group(1).lower() == "true"
+
+
+def recover_json_number(content: str, key: str) -> float | None:
+    match = re.search(rf'"{re.escape(key)}"\s*:\s*(-?\d+(?:\.\d+)?)', content)
+    if not match:
+        return None
+    return float(match.group(1))
+
+
+def recover_json_array(content: str, key: str) -> list[Any] | None:
+    match = re.search(rf'"{re.escape(key)}"\s*:\s*(\[[^\]]*\])', content, re.DOTALL)
+    if not match:
+        return None
+    try:
+        value = json.loads(match.group(1))
+    except JSONDecodeError:
+        return None
+    return value if isinstance(value, list) else None
