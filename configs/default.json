@@ -1,0 +1,18 @@
+{
+  "top_k_tiles": 2,
+  "heading_sectors": 10,
+  "max_bearing_deg": 60.0,
+  "visible_threshold": 1.5,
+  "particle_count": 200,
+  "min_triangulation_baseline_m": 0.5,
+  "scout_traversability_threshold": 0.7,
+  "go1_traversability_threshold": 0.5,
+  "risk_lambda": 1.0,
+  "theta_min_deg": 15.0,
+  "theta_max_deg": 60.0,
+  "memory_uncertainty_gamma": 1.0,
+  "process_noise_m": 0.1,
+  "observation_noise_px": 15.0,
+  "init_noise_m": 1.0,
+  "default_speed_mps": 0.5
+}

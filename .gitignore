@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.taric_cache/
+outputs/*.jsonl
+outputs/*.json
+outputs/*.png
+outputs/*.jpg
+data/generated/
+work/
