@@ -25,6 +25,7 @@ This document tracks the TARIC/VLN reproduction plan at the current engineering 
 - Verified `small_eval` with the mock offline runner and summary metrics.
 - Added a configurable ROS Noetic bridge for TurtleBot3 `waffle_pi` topics and Qwen/mock vision backends.
 - Added a TurtleBot3 commander that converts `/taric/executable_heading` into conservative `/cmd_vel` commands.
+- Added a ROS episode recorder for TurtleBot3 Gazebo image, camera-info, and odometry topics.
 
 ## Current Stage
 
@@ -41,6 +42,7 @@ Approximate progress: 50%.
 - Smoke test the ROS bridge in Gazebo with `TARIC_VISION_BACKEND=mock`.
 - Run the TurtleBot3 commander at low speed and verify `/cmd_vel`.
 - Switch the ROS bridge to `TARIC_VISION_BACKEND=qwen` after mock topics are stable.
+- Record `data/episodes/gazebo_small_eval/manifest.jsonl` from Gazebo using `taric_vln.ros.episode_recorder`.
 - Build a simulator or use an existing outdoor simulator/ROS bag source for larger scale evaluation.
 - Generate pseudolabels from Qwen for visible gate, tile scoring, and traversability sectors.
 - Train or distill lightweight local modules.

@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 from taric_vln.perception import MockVLMClient, QwenVisionClient
+from taric_vln.ros.episode_recorder import (
+    EpisodeRecorderSettings,
+    parse_bool,
+    parse_optional_float,
+)
 from taric_vln.ros.ros_bridge import RosBridgeSettings, build_vlm_client
 from taric_vln.ros.turtlebot3_commander import TurtleBot3CommanderSettings
 
@@ -37,3 +42,22 @@ def test_turtlebot3_commander_defaults_are_conservative() -> None:
     assert settings.cmd_vel_topic == "/cmd_vel"
     assert settings.max_speed_mps <= 0.2
     assert settings.command_timeout_s > 0.0
+
+
+def test_episode_recorder_defaults_target_gazebo_small_eval() -> None:
+    settings = EpisodeRecorderSettings(episode_id="gazebo_test")
+
+    assert settings.image_topic == "/camera/rgb/image_raw"
+    assert settings.camera_info_topic == "/camera/rgb/camera_info"
+    assert settings.odom_topic == "/odom"
+    assert settings.output_root == "data/episodes/gazebo_small_eval"
+    assert settings.episode_id == "gazebo_test"
+    assert settings.max_frames == 50
+
+
+def test_episode_recorder_parses_env_helpers() -> None:
+    assert parse_bool("true") is True
+    assert parse_bool("0", default=True) is False
+    assert parse_bool(None, default=True) is True
+    assert parse_optional_float("") is None
+    assert parse_optional_float("3.5") == 3.5

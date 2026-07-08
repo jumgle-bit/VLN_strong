@@ -142,3 +142,15 @@ python3 -m taric_vln.ros.turtlebot3_commander
 ```
 
 See `docs/ros_turtlebot3.md` for the full Gazebo workflow. The low-level controller or local planner should still enforce robot safety.
+
+To record a Gazebo episode into an offline manifest:
+
+```bash
+cd ~/VLN_strong
+source /opt/ros/noetic/setup.bash
+export PYTHONPATH=$PWD/src:$PYTHONPATH
+export TARIC_RECORD_ROOT=data/episodes/gazebo_small_eval
+export TARIC_EPISODE_ID=gazebo_001
+export TARIC_INSTRUCTION="Find the target building. Stay on the paved path and avoid grass."
+/usr/bin/python3 -m taric_vln.ros.episode_recorder
+```

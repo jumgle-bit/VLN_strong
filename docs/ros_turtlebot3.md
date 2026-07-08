@@ -143,6 +143,57 @@ python3 -m taric_vln.ros.ros_bridge
 
 Keep `TARIC_FRAME_INTERVAL_S` at 5 seconds or higher while debugging. Qwen is a cloud API; do not call it at camera frame rate.
 
+## Terminal 5: Record a Gazebo Episode
+
+After Gazebo, the bridge, and the commander work, record a small offline dataset from ROS topics. This is the next step toward reproducible VLN experiments.
+
+Start with one short episode:
+
+```bash
+cd ~/VLN_strong
+source /opt/ros/noetic/setup.bash
+export PYTHONPATH=$PWD/src:$PYTHONPATH
+
+export TARIC_RECORD_ROOT=data/episodes/gazebo_small_eval
+export TARIC_EPISODE_ID=gazebo_001
+export TARIC_INSTRUCTION="Find the target building. Stay on the paved path and avoid grass."
+export TARIC_RECORD_INTERVAL_S=1
+export TARIC_RECORD_MAX_FRAMES=30
+
+# Optional: set a rough goal in Gazebo world coordinates.
+# If omitted, the recorder uses a goal 3m in front of the initial pose.
+export TARIC_GOAL_X=3.0
+export TARIC_GOAL_Y=0.0
+export TARIC_GOAL_Z=0.0
+export TARIC_SHORTEST_PATH_M=3.0
+export TARIC_CUE_AVAILABLE_GT=true
+
+/usr/bin/python3 -m taric_vln.ros.episode_recorder
+```
+
+The recorder writes:
+
+```text
+data/episodes/gazebo_small_eval/manifest.jsonl
+data/episodes/gazebo_small_eval/images/
+```
+
+Then run offline replay from the project virtual environment:
+
+```bash
+cd ~/VLN_strong
+source .venv/bin/activate
+
+python scripts/run_offline_episode.py \
+  --manifest data/episodes/gazebo_small_eval/manifest.jsonl \
+  --output outputs/gazebo_small_eval_mock_run.jsonl \
+  --mock
+
+python scripts/summarize_run.py --input outputs/gazebo_small_eval_mock_run.jsonl
+```
+
+After mock offline replay works, run a small Qwen pass on the recorded manifest.
+
 ## Environment Variables
 
 Bridge:
@@ -169,6 +220,23 @@ TARIC_MAX_ANGULAR_Z_RAD_S=0.6
 TARIC_YAW_GAIN=1.0
 TARIC_CONTROL_HZ=10
 TARIC_COMMAND_TIMEOUT_S=2
+```
+
+Recorder:
+
+```text
+TARIC_RECORD_ROOT=data/episodes/gazebo_small_eval
+TARIC_EPISODE_ID=gazebo_001
+TARIC_RECORD_INTERVAL_S=1
+TARIC_RECORD_MAX_FRAMES=30
+TARIC_GOAL_X=3.0
+TARIC_GOAL_Y=0.0
+TARIC_GOAL_Z=0.0
+TARIC_GOAL_OFFSET_X=3.0
+TARIC_GOAL_OFFSET_Y=0.0
+TARIC_SHORTEST_PATH_M=3.0
+TARIC_CUE_AVAILABLE_GT=true
+TARIC_RECORD_IMAGE_EXT=jpg
 ```
 
 ## Current Limitations
