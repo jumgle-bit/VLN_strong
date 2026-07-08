@@ -38,11 +38,20 @@ sudo apt install -y \
   python3-rospkg \
   python3-catkin-pkg \
   python3-empy \
+  python3-numpy \
   python3-yaml \
   python3-opencv \
   ros-noetic-cv-bridge \
   ros-noetic-xacro
 ```
+
+Verify the system Python imports before starting the bridge:
+
+```bash
+python3 -c "import numpy, cv2, cv_bridge, rospkg; print('ROS Python deps OK')"
+```
+
+If this fails while your shell prompt shows `(.venv)`, run `deactivate` first and retry. ROS bridge nodes should use system Python, not the project virtual environment.
 
 ## Terminal 1: Start Gazebo
 

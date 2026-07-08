@@ -44,7 +44,7 @@ python scripts/smoke_deepseek.py --image data/samples/example.jpg --instruction 
 Install ROS Noetic only on the machine that will connect to a robot or ROS bag:
 
 ```bash
-sudo apt install -y ros-noetic-desktop-full ros-noetic-cv-bridge ros-noetic-nav-msgs ros-noetic-sensor-msgs
+sudo apt install -y ros-noetic-desktop-full ros-noetic-cv-bridge ros-noetic-nav-msgs ros-noetic-sensor-msgs python3-numpy python3-opencv
 ```
 
 The ROS bridge publishes heading/debug topics and leaves final safety to the robot's local planner or native controller.
