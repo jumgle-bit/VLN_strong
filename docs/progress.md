@@ -21,17 +21,21 @@ This document tracks the TARIC/VLN reproduction plan at the current engineering 
 - Confirmed Qwen image access with the synthetic `library_entrance.png` smoke-test image.
 - Added nonstandard/truncated Qwen JSON recovery for required TARIC fields.
 - Added a generated 30-episode synthetic VLN dataset for small-scale offline pipeline validation.
+- Added a simulated `small_eval` dataset with 10 episodes, 12 steps per episode, and 120 generated outdoor VLN frames.
+- Verified `small_eval` with the mock offline runner and summary metrics.
 
 ## Current Stage
 
-You are now at the start of offline VLN episode replay. The perception frontends are usable, and the next task is to build image-sequence manifests with poses and goals.
+You now have two offline replay datasets:
 
-Approximate progress: 40-45%.
+- `data/episodes/synthetic_30/manifest.jsonl`: 30 short engineering-validation episodes.
+- `data/episodes/small_eval/manifest.jsonl`: 10 simulated evaluation episodes for the first controlled small-scale experiment.
+
+Approximate progress: 50%.
 
 ## Not Yet Completed
 
-- Build real or simulated VLN datasets with image sequences, camera intrinsics, robot poses, goal positions, and cue-availability labels.
-- Run 30 short offline episodes and inspect per-step outputs.
+- Inspect per-step Qwen outputs on `small_eval`.
 - Build a simulator or use an existing outdoor simulator/ROS bag source for larger scale evaluation.
 - Generate pseudolabels from Qwen for visible gate, tile scoring, and traversability sectors.
 - Train or distill lightweight local modules.
@@ -40,15 +44,15 @@ Approximate progress: 40-45%.
 
 ## Next Milestone
 
-Run the included 30-episode synthetic dataset end to end:
+Run the simulated `small_eval` dataset end to end with the mock client:
 
 ```bash
 python scripts/run_offline_episode.py \
-  --manifest data/episodes/synthetic_30/manifest.jsonl \
-  --output outputs/synthetic_30_run.jsonl \
-  --qwen
+  --manifest data/episodes/small_eval/manifest.jsonl \
+  --output outputs/small_eval_mock_run.jsonl \
+  --mock
 
-python scripts/summarize_run.py --input outputs/synthetic_30_run.jsonl
+python scripts/summarize_run.py --input outputs/small_eval_mock_run.jsonl
 ```
 
-After this works, replace the synthetic manifest with real sequences collected from simulation, video, or ROS bags.
+Then run a small Qwen pass on `small_eval`, inspect the JSON outputs, and generate pseudolabels for lightweight module training.

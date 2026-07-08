@@ -429,3 +429,50 @@ python scripts/generate_pseudolabels.py \
 - 如果后续上云 GPU，优先用于仿真、轻量模型训练和批量数据处理，不用于训练闭源 VLM。
 
 当前最关键的下一步是制作真实 `small_eval` 数据集。完成它以后，项目才真正进入论文复现实验阶段。
+
+## 10. 2026-07-08 更新：仿真 small_eval 已完成
+
+由于目前没有真实环境，项目已先生成一个完全仿真的 `small_eval` 数据集：
+
+```text
+data/episodes/small_eval/manifest.jsonl
+data/episodes/small_eval/images/
+```
+
+规模：
+
+- 10 episodes。
+- 每个 episode 12 step。
+- 共 120 张仿真户外 VLN 图片。
+- 包含 paved path、grass、target building、target sign 和 cue-interruption frame。
+- `episode_id` 使用 `small_eval_001` 到 `small_eval_010`。
+
+已完成验证：
+
+```bash
+python scripts/run_offline_episode.py \
+  --manifest data/episodes/small_eval/manifest.jsonl \
+  --output outputs/small_eval_mock_run.jsonl \
+  --mock
+
+python scripts/summarize_run.py --input outputs/small_eval_mock_run.jsonl
+```
+
+mock 汇总结果：
+
+```json
+{
+  "episodes": 10.0,
+  "sr": 1.0,
+  "spl": 0.999399660463863,
+  "fail_at_cf": 0.0,
+  "mean_final_distance_m": 0.63
+}
+```
+
+新的下一步不是再制作 small_eval，而是：
+
+1. 用 Qwen 跑 `data/episodes/small_eval/manifest.jsonl`。
+2. 检查每一步的视觉 JSON 输出是否合理。
+3. 用 `scripts/generate_pseudolabels.py` 生成伪标签。
+4. 基于伪标签开始训练 visible gate、tile scorer 和 traversability classifier。
