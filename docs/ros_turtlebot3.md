@@ -147,6 +147,8 @@ Keep `TARIC_FRAME_INTERVAL_S` at 5 seconds or higher while debugging. Qwen is a 
 
 After Gazebo, the bridge, and the commander work, record a small offline dataset from ROS topics. This is the next step toward reproducible VLN experiments.
 
+For dataset recording, prefer a controlled driver instead of the closed-loop commander. The commander can keep driving into a wall if the mock heading stays constant, which produces poor offline episodes. The batch script below resets TurtleBot3 near the open center of the Gazebo world before each episode and drives a slow short arc while the recorder captures images and odometry.
+
 Start with one short episode:
 
 ```bash
@@ -193,6 +195,24 @@ python scripts/summarize_run.py --input outputs/gazebo_small_eval_mock_run.jsonl
 ```
 
 After mock offline replay works, run a small Qwen pass on the recorded manifest.
+
+## Batch Record Gazebo Episodes 002-010
+
+Start Gazebo first, then run this in a separate terminal:
+
+```bash
+cd ~/VLN_strong
+bash scripts/record_gazebo_small_eval.sh
+```
+
+The script records `gazebo_002` through `gazebo_010`. Each episode:
+
+- resets the robot pose through `/gazebo/set_model_state`
+- drives a conservative short arc on `/cmd_vel`
+- records 30 frames through `taric_vln.ros.episode_recorder`
+- stops the robot before the next episode
+
+If you rerun it, back up or clear `data/episodes/gazebo_small_eval/manifest.jsonl` first; the recorder appends rows.
 
 ## Environment Variables
 
