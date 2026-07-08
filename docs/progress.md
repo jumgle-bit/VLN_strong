@@ -23,6 +23,8 @@ This document tracks the TARIC/VLN reproduction plan at the current engineering 
 - Added a generated 30-episode synthetic VLN dataset for small-scale offline pipeline validation.
 - Added a simulated `small_eval` dataset with 10 episodes, 12 steps per episode, and 120 generated outdoor VLN frames.
 - Verified `small_eval` with the mock offline runner and summary metrics.
+- Added a configurable ROS Noetic bridge for TurtleBot3 `waffle_pi` topics and Qwen/mock vision backends.
+- Added a TurtleBot3 commander that converts `/taric/executable_heading` into conservative `/cmd_vel` commands.
 
 ## Current Stage
 
@@ -36,6 +38,9 @@ Approximate progress: 50%.
 ## Not Yet Completed
 
 - Inspect per-step Qwen outputs on `small_eval`.
+- Smoke test the ROS bridge in Gazebo with `TARIC_VISION_BACKEND=mock`.
+- Run the TurtleBot3 commander at low speed and verify `/cmd_vel`.
+- Switch the ROS bridge to `TARIC_VISION_BACKEND=qwen` after mock topics are stable.
 - Build a simulator or use an existing outdoor simulator/ROS bag source for larger scale evaluation.
 - Generate pseudolabels from Qwen for visible gate, tile scoring, and traversability sectors.
 - Train or distill lightweight local modules.

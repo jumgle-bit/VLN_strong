@@ -124,7 +124,21 @@ These labels are intended for lightweight distillation tasks such as tile scorin
 The bridge is intentionally import-safe on machines without ROS. On Ubuntu 20.04 with ROS Noetic:
 
 ```bash
-rosrun taric_vln ros_bridge.py
+cd ~/VLN_strong
+source /opt/ros/noetic/setup.bash
+export PYTHONPATH=$PWD/src:$PYTHONPATH
+export TARIC_VISION_BACKEND=mock
+export TARIC_INSTRUCTION="Find the target building. Stay on the paved path and avoid grass."
+python3 -m taric_vln.ros.ros_bridge
 ```
 
-The bridge subscribes to camera and odometry topics and publishes executable heading plus debug signals. The low-level controller or local planner should still enforce robot safety.
+The bridge subscribes to TurtleBot3 `waffle_pi` camera and odometry topics and publishes executable heading plus debug signals. Use the TurtleBot3 commander to convert heading to `/cmd_vel`:
+
+```bash
+cd ~/VLN_strong
+source /opt/ros/noetic/setup.bash
+export PYTHONPATH=$PWD/src:$PYTHONPATH
+python3 -m taric_vln.ros.turtlebot3_commander
+```
+
+See `docs/ros_turtlebot3.md` for the full Gazebo workflow. The low-level controller or local planner should still enforce robot safety.
